@@ -1,6 +1,6 @@
 # MT_curvature_simulation
 
-Modeling the tip of an MT as an ABP and treating the motor binding events as a Poisson process.
+Modeling the tip of an MT as an Active Brownian Particle (ABP) and treating the motor binding events as a Poisson process.
 
 ---
 
