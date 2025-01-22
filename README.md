@@ -1,62 +1,92 @@
 # MT_curvature_simulation
-Modeling the tip of an MT as an ABP and treating the motor binding events as a poisson process.
-——————————————————————————————————————————————————————————————————————————————————————————————————————————————---------------
-Main
-——————————————————————————————————————————————————————————————————————————————————————————————————————————————---------------
-INPUT PARAMETERS IN THE CODE:
-rate - Rate of binding events
-num_events - Number of binding events
-vel - Velocity of the ABP (MT)
-dt - Time interval of the ABP
-Drot - Rotational diffusion of the ABP
-Dtrans - Translational diffusion of the ABP
-theta - Initial theta value
-theta_0 - Maximum allowed absolute value of orientation angle at each ABP step. Models the bending stiffness of the MT.
-guess - Needed to numerically find roots of a transcendental equation.
 
-OUTPUT OF THE CODE: 2 files “Curvature.txt” and “Position_and_orientation.txt” will be gererated.
-1. Curvature.txt - Has 4 columns (Event number, Curvature, Theta_final_of_ABP, delta_theta_of_each_ABP). We need to find curvature. The histogram of the 2nd column can be plotted using ‘histogram.py’ that is attached.
-2. Position_and_orientation.txt - Contains the position and orientation of the walker at all times. 
+Modeling the tip of an MT as an ABP and treating the motor binding events as a Poisson process.
 
-The function 'Time_step' is called first to generate the time intervals between each motor binding event. This also gives the number of steps of an ABP that will be called between each binding event. The function 'ABP' simulates the motion of the tip of the MT between each motor binding event. This takes into account the initial orientating on the ABP. After each ABP, the final position, the displacement to distance ratio and the initial orientation angle will uniquely determine the arc of motion of the ABP. This arc gives a curvature. It will also intern set the initial orientation angle of the next ABP which takes place in the next time interval between the binding events. The functions 'To_get_theta_final' determines the unique arc, and intern also gives the final angle of the ABP which serves as the initial angle for the next ABP. The function 'Curvature' computes the curvature of this unique arc. 
-——————————————————————————————————————————————————————————————————————————————————————————————————————————————---------------
-Functions
-——————————————————————————————————————————————————————————————————————————————————————————————————————————————---------------
-There are 4 parts to this code defined as functions, namely 'Time_step', 'ABP', 'To_get_theta_final' and 'Curvature'.
+---
 
-1. Time_step(rate, num_events(int), dt): This gives the time interval between each binding event.
-Input: 
-rate - Rate of the event occurring (Motor binding event).
-num_events - Total number of motor binding events to simulate (this is an integer number)
-dt - To calculate the number of time steps an ABP needs to be run in each time interval of time.
-Output:
-inter_arrival_time - Time interval between each binding event.
-event_time - This is the cumulative progress of time.
-n_steps = int(inter_arrival_time/dt). Integer value of the number of time steps. (this will be an input function - ABP)
+## Main
 
-2. ABP(nsteps(int), theta, theta_0, dt, vel, Drot, Dtrans):
-Input:
-nsteps - Number of steps the ABP should take. This is an output from the previous function.
-theta - Initial orientation angle of the walker
-theta_0 - Maximum allowed absolute value of orientation angle at each ABP step. Models the bending stiffness of the MT.
-dt - Time interval of each ABP step. This parameter should be same as the dt in the previous function.
-Drot - Rotational diffusion.
-Dtrans - Translational diffusion.
+### Input Parameters in the Code:
+- **rate**: Rate of binding events
+- **num_events**: Number of binding events
+- **vel**: Velocity of the ABP (MT)
+- **dt**: Time interval of the ABP
+- **Drot**: Rotational diffusion of the ABP
+- **Dtrans**: Translational diffusion of the ABP
+- **theta**: Initial theta value
+- **theta_0**: Maximum allowed absolute value of orientation angle at each ABP step. Models the bending stiffness of the MT.
+- **guess**: Needed to numerically find roots of a transcendental equation.
 
-3. To_get_theta_final(theta_initial, guess, d_by_l): Under the assumption that the MT is like an arc of a circle between each binding events, the final position of the ABP and the distance travelled by the ABP can give a unique final orientation angle and the curvature of the arc. This arc can be analytically found to be a single variable linear transcendental equation which needs to be solved to find the final theta at each binging event. This function uses \fsolve (an inbuilt function to find roots).
-Input:
-theta_initial - Initial orientation of the ABP.
-guess - An initial guess value needs to be provided to solve the equation.
-d_by_l - This is the ratio of the displacement to the distance travelled by the ABP.
-Output:
-theta_final - The final orientation of the ABP. This will serve as the theta_initial for the next ABP in the next poisson distributed time interval.
-Note: The transcendental equation that this function solves is given by another function
-‘func(x,dis_len)’ --> dis_len*x - np.sin(x). Where dis_len = d_by_l and x is the theta variable.
+### Output of the Code:
+Two files, `Curvature.txt` and `Position_and_orientation.txt`, will be generated:
 
-4. Curvature(theta, theta_final, length): This gives the curvature of the ABP between each binding event. There is one curvature value associates with every ABP (between each binding event).
-Input:
-theta - Initial orientation of the ABP.
-theta_final - Find orientation of the ABP determined from solving the transcendental equation using the previous function. 
-length - distance travelled by the ABP.
-Output:
-curvature - The curvature of the arc that approximates the movement of the MT between two binding events.
+1. **Curvature.txt**
+   - Contains 4 columns: (Event number, Curvature, Theta_final_of_ABP, Delta_theta_of_each_ABP).
+   - The curvature can be plotted as a histogram using the `histogram.py` script.
+
+2. **Position_and_orientation.txt**
+   - Contains the position and orientation of the walker at all times.
+
+### Workflow:
+- The function `Time_step` is called first to generate the time intervals between each motor binding event. This also gives the number of steps of an ABP that will be called between each binding event.
+- The function `ABP` simulates the motion of the tip of the MT between each motor binding event, considering the initial orientation of the ABP.
+- After each ABP, the final position, displacement-to-distance ratio, and initial orientation angle uniquely determine the arc of motion of the ABP. This arc gives the curvature.
+- The `To_get_theta_final` function determines the unique arc and provides the final angle of the ABP, which serves as the initial angle for the next ABP.
+- The `Curvature` function computes the curvature of this unique arc.
+
+---
+
+## Functions
+
+### 1. `Time_step(rate, num_events, dt)`
+Generates the time interval between each binding event.
+
+#### Input:
+- **rate**: Rate of the motor binding event.
+- **num_events**: Total number of motor binding events to simulate (integer).
+- **dt**: Time step to calculate the number of steps an ABP needs to run in each interval.
+
+#### Output:
+- **inter_arrival_time**: Time interval between each binding event.
+- **event_time**: Cumulative progress of time.
+- **n_steps**: Integer value of the number of steps (calculated as `int(inter_arrival_time / dt)`).
+
+### 2. `ABP(n_steps, theta, theta_0, dt, vel, Drot, Dtrans)`
+Simulates the motion of the ABP.
+
+#### Input:
+- **n_steps**: Number of steps the ABP should take (output from `Time_step`).
+- **theta**: Initial orientation angle of the walker.
+- **theta_0**: Maximum allowed absolute value of orientation angle at each ABP step.
+- **dt**: Time interval of each ABP step (same as in `Time_step`).
+- **Drot**: Rotational diffusion.
+- **Dtrans**: Translational diffusion.
+
+### 3. `To_get_theta_final(theta_initial, guess, d_by_l)`
+Determines the unique final orientation angle and curvature of the arc based on the ABP's position and displacement.
+
+#### Input:
+- **theta_initial**: Initial orientation of the ABP.
+- **guess**: Initial guess value for solving the equation.
+- **d_by_l**: Ratio of displacement to the distance traveled by the ABP.
+
+#### Output:
+- **theta_final**: Final orientation of the ABP, used as the initial angle for the next ABP.
+
+#### Notes:
+This function solves a transcendental equation using `fsolve`:
+```
+func(x, dis_len) = dis_len * x - np.sin(x)
+```
+Where `dis_len = d_by_l` and `x` is the theta variable.
+
+### 4. `Curvature(theta, theta_final, length)`
+Computes the curvature of the ABP between binding events.
+
+#### Input:
+- **theta**: Initial orientation angle.
+- **theta_final**: Final orientation angle.
+- **length**: Arc length of the ABP.
+
+#### Output:
+- **curvature**: Curvature value for each ABP between binding events.
